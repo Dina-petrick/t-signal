@@ -12,8 +12,35 @@ import TemplateLanguageSection from './sections/TemplateLanguageSection';
 
 type Props = {
   template: Template;
+  // onFileUpload: (file: File) => Promise<string>;
   setTemplate: React.Dispatch<React.SetStateAction<Template>>;
 };
+
+  const mockFileUpload = (file: File): Promise<string> => {
+    console.log(`Uploading file: ${file.name}`);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (file.type.startsWith('image/') || file.type.startsWith('video/') || file.type === 'application/pdf') {
+          const fileUrl = URL.createObjectURL(file);
+          console.log(`File uploaded successfully: ${fileUrl}`);
+          resolve(fileUrl);
+        } else {
+          console.error('Upload failed: Unsupported file type.');
+          reject(new Error('Mock upload failed. Unsupported file type.'));
+        }
+      }, 1500);
+    });
+  };
+
+  const onFileUpload = async (file: File): Promise<string> => {
+    try {
+      const filePath = await mockFileUpload(file);
+      return filePath;
+    } catch (error) {
+      console.error('Upload failed in parent:', error);
+      throw error;
+    }
+  };
 
 export function TrustSignalTemplateBuilder({ template, setTemplate }: Props) {
   return (
@@ -22,7 +49,7 @@ export function TrustSignalTemplateBuilder({ template, setTemplate }: Props) {
       <div className="rsp-space-y-6">
         <h2 className="rsp-text-lg rsp-font-semibold rsp-text-gray-900">Message Content</h2>
         <div className="rsp-space-y-6">
-          <HeaderSection template={template} setTemplate={setTemplate} />
+          <HeaderSection template={template} setTemplate={setTemplate} onFileUpload={onFileUpload} />
           <MessageStructure template={template} setTemplate={setTemplate} />
         </div>
       </div>
