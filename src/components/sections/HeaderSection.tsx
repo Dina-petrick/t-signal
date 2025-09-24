@@ -5,6 +5,12 @@ import { Template, HeaderType, MediaType } from '../../types';
 type Props = {
   template: Template;
   setTemplate: React.Dispatch<React.SetStateAction<Template>>;
+  /**
+   * Handles the file upload process.
+   * @param file The file to upload.
+   * @returns A promise that resolves to the URL of the uploaded file.
+   */
+  onFileUpload: (file: File) => Promise<string>;
 };
 
 const headerTypes: { value: HeaderType; label: string }[] = [
@@ -19,10 +25,11 @@ const mediaTypes: { value: MediaType; label: string }[] = [
   { value: 'VIDEO', label: 'Video' }
 ];
 
-export default function HeaderSection({ template, setTemplate }: Props) {
+export default function HeaderSection({ template, setTemplate, onFileUpload }: Props) {
   const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [headerTextareaRef, setHeaderTextareaRef] = React.useState<HTMLInputElement | null>(null);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   const getLastVariableNumber = (text: string): number => {
     const matches = text.match(/{{\d+}}/g);
@@ -74,6 +81,7 @@ export default function HeaderSection({ template, setTemplate }: Props) {
     // Clear uploaded file when changing header type
     if (headerType !== 'MEDIA') {
       setUploadedFile(null);
+      setUploadError(null);
     }
   };
 
@@ -83,27 +91,26 @@ export default function HeaderSection({ template, setTemplate }: Props) {
 
     setIsUploading(true);
     setUploadedFile(file);
+    setUploadError(null);
 
     try {
-      // Create a local URL for the uploaded file
-      const fileUrl = URL.createObjectURL(file);
+      // The upload logic is now handled by the parent component via onFileUpload prop
+      const fileUrl = await onFileUpload(file);
       setTemplate({ ...template, mediaUrl: fileUrl });
     } catch (error) {
       console.error('File upload failed:', error);
       setUploadedFile(null);
-      // Show error to user
-      alert(error instanceof Error ? error.message : 'File upload failed. Please use a direct URL instead.');
+      const errorMessage = error instanceof Error ? error.message : 'File upload failed. Please try again.';
+      setUploadError(errorMessage);
     } finally {
       setIsUploading(false);
     }
   };
 
   const removeUploadedFile = () => {
-    if (uploadedFile && template.mediaUrl) {
-      URL.revokeObjectURL(template.mediaUrl);
-    }
     setUploadedFile(null);
     setTemplate({ ...template, mediaUrl: '' });
+    setUploadError(null);
   };
 
   const getAcceptedFileTypes = () => {
@@ -203,7 +210,7 @@ export default function HeaderSection({ template, setTemplate }: Props) {
                   {uniqueVariables.map((variable) => (
                     <div key={`header-sample-${variable}`} className="rsp-flex rsp-items-center rsp-gap-2">
                       <label className="rsp-text-xs rsp-text-gray-500 rsp-whitespace-nowrap">
-                        {'{{'}{variable}{'}}'}: 
+                        {`{{${variable}}}`}: 
                       </label>
                       <input
                         type="text"
@@ -211,12 +218,10 @@ export default function HeaderSection({ template, setTemplate }: Props) {
                         onChange={(e) => {
                           const newSampleContent = {
                             ...template.sampleContent,
-                            // FIX: This now correctly targets 'headerVariables' for updates
                             headerVariables: {
                               ...template.sampleContent?.headerVariables,
                               [variable]: e.target.value
                             },
-                            // This line correctly preserves the existing body variables
                             bodyVariables: template.sampleContent?.bodyVariables || {}
                           };
                           setTemplate({
@@ -246,7 +251,11 @@ export default function HeaderSection({ template, setTemplate }: Props) {
             <div className="rsp-relative">
               <select
                 value={template.mediaType || 'IMAGE'}
-                onChange={(e) => setTemplate({ ...template, mediaType: e.target.value as MediaType })}
+                onChange={(e) => {
+                  setTemplate({ ...template, mediaType: e.target.value as MediaType, mediaUrl: '' });
+                  setUploadedFile(null);
+                  setUploadError(null);
+                }}
                 className="rsp-w-full rsp-px-0 rsp-py-2 rsp-border-0 rsp-border-b rsp-border-gray-300 rsp-text-sm focus:rsp-outline-none focus:rsp-border-blue-500 rsp-bg-transparent rsp-appearance-none"
               >
                 {mediaTypes.map((type) => (
@@ -263,108 +272,95 @@ export default function HeaderSection({ template, setTemplate }: Props) {
             </div>
           </div>
 
-          <div>
-            <label className="rsp-block rsp-text-sm rsp-font-medium rsp-text-gray-700 rsp-mb-2">
+          <div className="rsp-space-y-4">
+            <label className="rsp-block rsp-text-sm rsp-font-medium rsp-text-gray-700">
               Media
             </label>
             
-            {!uploadedFile && !template.mediaUrl ? (
-              <div className="rsp-space-y-4">
-                {/* File Upload */}
-                <div className="rsp-relative">
-                  <input
-                    type="file"
-                    accept={getAcceptedFileTypes()}
-                    onChange={handleFileUpload}
-                    className="rsp-hidden"
-                    id="media-upload"
-                    disabled={isUploading}
-                  />
-                  <label
-                    htmlFor="media-upload"
-                    className={`rsp-w-full rsp-px-4 rsp-py-3 rsp-border-2 rsp-border-dashed rsp-border-gray-300 rsp-rounded-md rsp-flex rsp-flex-col rsp-items-center rsp-justify-center rsp-cursor-pointer rsp-transition-colors hover:rsp-border-gray-400 hover:rsp-bg-gray-50 ${
-                      isUploading ? 'rsp-opacity-50 rsp-cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <Upload className="rsp-w-6 rsp-h-6 rsp-text-gray-400 rsp-mb-2" />
-                    <span className="rsp-text-sm rsp-text-gray-600">
-                      {isUploading ? 'Uploading...' : `Upload ${template.mediaType?.toLowerCase() || 'file'}`}
-                    </span>
-                    <span className="rsp-text-xs rsp-text-gray-400 rsp-mt-1">
-                      {template.mediaType === 'IMAGE' && 'PNG, JPG, GIF up to 5MB'}
-                      {template.mediaType === 'VIDEO' && 'MP4, MOV up to 16MB'}
-                      {template.mediaType === 'DOCUMENT' && 'PDF, DOC, TXT up to 100MB'}
-                    </span>
-                  </label>
-                </div>
-
-                {/* OR divider */}
-                <div className="rsp-flex rsp-items-center">
-                  <div className="rsp-flex-1 rsp-border-t rsp-border-gray-300"></div>
-                  <span className="rsp-px-3 rsp-text-sm rsp-text-gray-500">OR</span>
-                  <div className="rsp-flex-1 rsp-border-t rsp-border-gray-300"></div>
-                </div>
-
-                {/* URL Input */}
-                <div className="rsp-relative">
-                  <input
-                    type="url"
-                    value={template.mediaUrl || ''}
-                    onChange={(e) => setTemplate({ ...template, mediaUrl: e.target.value })}
-                    className="rsp-w-full rsp-px-0 rsp-py-2 rsp-border-0 rsp-border-b rsp-border-gray-300 rsp-text-sm focus:rsp-outline-none focus:rsp-border-blue-500 rsp-bg-transparent"
-                    placeholder={`Enter ${template.mediaType?.toLowerCase()} URL`}
-                  />
-                </div>
-              </div>
-            ) : (
-              /* Show uploaded file or URL */
-              <div className="rsp-space-y-3">
-                <div className="rsp-flex rsp-items-center rsp-justify-between rsp-p-3 rsp-bg-gray-50 rsp-border rsp-border-gray-200 rsp-rounded-md">
-                  <div className="rsp-flex rsp-items-center rsp-space-x-3">
-                    {template.mediaType === 'IMAGE' && template.mediaUrl && (
-                      <img 
-                        src={template.mediaUrl} 
-                        alt="Preview" 
-                        className="rsp-w-12 rsp-h-12 rsp-object-cover rsp-rounded"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                    <div>
-                      <p className="rsp-text-sm rsp-font-medium rsp-text-gray-900">
-                        {uploadedFile ? uploadedFile.name : 'Media URL'}
-                      </p>
-                      <p className="rsp-text-xs rsp-text-gray-500">
-                        {uploadedFile 
-                          ? `${(uploadedFile.size / 1024 / 1024).toFixed(2)} MB`
-                          : template.mediaUrl
-                        }
-                      </p>
-                    </div>
+            {/* File Upload Area */}
+            {uploadedFile ? (
+              <div className="rsp-flex rsp-items-center rsp-justify-between rsp-p-3 rsp-bg-gray-50 rsp-border rsp-border-gray-200 rsp-rounded-md">
+                <div className="rsp-flex rsp-items-center rsp-space-x-3 overflow-hidden">
+                  {template.mediaType === 'IMAGE' && template.mediaUrl && (
+                    <img 
+                      src={template.mediaUrl} 
+                      alt="Preview" 
+                      className="rsp-w-12 rsp-h-12 rsp-object-cover rsp-rounded"
+                    />
+                  )}
+                  <div className="overflow-hidden">
+                    <p className="rsp-text-sm rsp-font-medium rsp-text-gray-900 rsp-truncate">
+                      {uploadedFile.name}
+                    </p>
+                    <p className="rsp-text-xs rsp-text-gray-500">
+                      {`${(uploadedFile.size / 1024 / 1024).toFixed(2)} MB`}
+                    </p>
                   </div>
-                  <button
-                    onClick={removeUploadedFile}
-                    className="rsp-p-1 rsp-text-gray-400 hover:rsp-text-red-500 rsp-transition-colors"
-                  >
-                    <X className="rsp-w-4 rsp-h-4" />
-                  </button>
                 </div>
-
-                {/* Option to change */}
                 <button
-                  onClick={() => {
-                    removeUploadedFile();
-                  }}
-                  className="rsp-text-sm rsp-text-blue-600 hover:rsp-text-blue-700"
+                  onClick={removeUploadedFile}
+                  className="rsp-p-1 rsp-text-gray-400 hover:rsp-text-red-500 rsp-transition-colors flex-shrink-0"
                 >
-                  Change media
+                  <X className="rsp-w-4 rsp-h-4" />
                 </button>
               </div>
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  accept={getAcceptedFileTypes()}
+                  onChange={handleFileUpload}
+                  className="rsp-hidden"
+                  id="media-upload"
+                  disabled={isUploading}
+                />
+                <label
+                  htmlFor="media-upload"
+                  className={`rsp-w-full rsp-px-4 rsp-py-3 rsp-border-2 rsp-border-dashed rsp-border-gray-300 rsp-rounded-md rsp-flex rsp-flex-col rsp-items-center rsp-justify-center rsp-cursor-pointer rsp-transition-colors hover:rsp-border-gray-400 hover:rsp-bg-gray-50 ${
+                    isUploading ? 'rsp-opacity-50 rsp-cursor-not-allowed' : ''
+                  }`}
+                >
+                  <Upload className="rsp-w-6 rsp-h-6 rsp-text-gray-400 rsp-mb-2" />
+                  <span className="rsp-text-sm rsp-text-gray-600">
+                    {isUploading ? 'Uploading...' : `Upload ${template.mediaType?.toLowerCase() || 'file'}`}
+                  </span>
+                  <span className="rsp-text-xs rsp-text-gray-400 rsp-mt-1">
+                    {template.mediaType === 'IMAGE' && 'PNG, JPG, GIF up to 5MB'}
+                    {template.mediaType === 'VIDEO' && 'MP4, MOV up to 16MB'}
+                    {template.mediaType === 'DOCUMENT' && 'PDF, DOC, TXT up to 100MB'}
+                  </span>
+                </label>
+              </div>
             )}
+
+            {uploadError && (
+              <p className="rsp-text-xs rsp-text-red-500">{uploadError}</p>
+            )}
+
+            {/* OR divider */}
+            <div className="rsp-flex rsp-items-center">
+              <div className="rsp-flex-1 rsp-border-t rsp-border-gray-300"></div>
+              <span className="rsp-px-3 rsp-text-sm rsp-text-gray-500">OR</span>
+              <div className="rsp-flex-1 rsp-border-t rsp-border-gray-300"></div>
+            </div>
+
+            {/* URL Input */}
+            <div className="rsp-relative">
+              <input
+                type="url"
+                value={template.mediaUrl || ''}
+                onChange={(e) => {
+                  setUploadedFile(null);
+                  setTemplate({ ...template, mediaUrl: e.target.value });
+                }}
+                className="rsp-w-full rsp-px-0 rsp-py-2 rsp-border-0 rsp-border-b rsp-border-gray-300 rsp-text-sm focus:rsp-outline-none focus:rsp-border-blue-500 rsp-bg-transparent"
+                placeholder={`Enter ${template.mediaType?.toLowerCase()} URL`}
+              />
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
+
