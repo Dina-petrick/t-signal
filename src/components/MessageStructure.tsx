@@ -14,8 +14,16 @@ export default function MessageStructure({ template, setTemplate }: Props) {
   const [bodyTextareaRef, setBodyTextareaRef] = useState<HTMLTextAreaElement | null>(null);
   const [footerInputRef, setFooterInputRef] = useState<HTMLInputElement | null>(null);
 
-  const getLastVariableNumber = (text: string): number => {
-    const matches = text.match(/{{\d+}}/g);
+  const getLastVariableNumberInTemplate = (): number => {
+    const allText = [
+      template.headerText || '',
+      template.body || '',
+      ...template.buttons
+        .filter(b => b.type === 'URL' && b.urlType === 'dynamic')
+        .map(b => b.value || '')
+    ].join(' ');
+
+    const matches = allText.match(/{{\d+}}/g);
     if (!matches) return 0;
     
     const numbers = matches.map(match => {
@@ -23,18 +31,19 @@ export default function MessageStructure({ template, setTemplate }: Props) {
       return num ? parseInt(num[1], 10) : 0;
     });
     
-    return Math.max(...numbers);
+    return numbers.length > 0 ? Math.max(...numbers) : 0;
   };
 
   const addVariable = () => {
-    // Get the highest variable number from body only
-    const lastBodyNumber = getLastVariableNumber(template.body);
-    const nextNumber = lastBodyNumber + 1;
-    if (bodyTextareaRef && template.body.length + `{{${nextNumber}}}`.length <= 1024) {
+    const lastNumber = getLastVariableNumberInTemplate();
+    const nextNumber = lastNumber + 1;
+    const variable = `{{${nextNumber}}}`;
+    
+    if (bodyTextareaRef && template.body.length + variable.length <= 1024) {
       const cursorPosition = bodyTextareaRef.selectionStart || template.body.length;
       const beforeCursor = template.body.substring(0, cursorPosition);
       const afterCursor = template.body.substring(cursorPosition);
-      const newBody = beforeCursor + `{{${nextNumber}}}` + afterCursor;
+      const newBody = beforeCursor + variable + afterCursor;
       
       setTemplate({ 
         ...template, 
@@ -44,7 +53,7 @@ export default function MessageStructure({ template, setTemplate }: Props) {
       // Set cursor position after the inserted variable
       setTimeout(() => {
         if (bodyTextareaRef) {
-          const newPosition = cursorPosition + `{{${nextNumber}}}`.length;
+          const newPosition = cursorPosition + variable.length;
           bodyTextareaRef.setSelectionRange(newPosition, newPosition);
           bodyTextareaRef.focus();
         }

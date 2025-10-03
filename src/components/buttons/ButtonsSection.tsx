@@ -40,7 +40,7 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
       id: Math.random().toString(36).substr(2, 9),
       type,
       text: formData.text,
-      value: type === 'QUICK_REPLY' ? '' : formData.value,
+      value: type === 'QUICK_REPLY' ? formData.text : formData.value,
       urlType: type === 'URL' ? formData.urlType : undefined,
     };
 
@@ -68,6 +68,29 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
         b.id === id ? { ...b, [field]: value.slice(0, maxLength) } : b
       ),
     });
+  };
+
+  const getLastVariableNumberInTemplate = (): number => {
+    const allTextInTemplate = [
+      template.headerText || '',
+      template.body || '',
+      ...template.buttons
+        .filter(b => b.type === 'URL' && b.urlType === 'dynamic')
+        .map(b => b.value || '')
+    ].join(' ');
+
+    // Also include the current input field which is not yet saved to the template
+    const allText = allTextInTemplate + ' ' + formData.value;
+
+    const matches = allText.match(/{{\d+}}/g);
+    if (!matches) return 0;
+    
+    const numbers = matches.map(match => {
+      const num = match.match(/{{(\d+)}}/);
+      return num ? parseInt(num[1], 10) : 0;
+    });
+    
+    return numbers.length > 0 ? Math.max(...numbers) : 0;
   };
 
   const buttonTypes = [
@@ -283,9 +306,7 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
                           const currentVarCount = (formData.value.match(/\{\{(\d+)\}\}/g) || []).length;
                           if (currentVarCount >= 3) return;
 
-                          const lastNum = (formData.value.match(/{{\d+}}/g) || [])
-                            .map(m => parseInt(m.replace(/[{}]/g, ""), 10))
-                            .reduce((a, b) => Math.max(a, b), 0);
+                          const lastNum = getLastVariableNumberInTemplate();
                           const nextNum = lastNum + 1;
                           const newUrl = formData.value + `{{${nextNum}}}`;
                           setFormData({ ...formData, value: newUrl });
@@ -318,16 +339,16 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
                                 </label>
                                 <input
                                   type="text"
-                                  value={template.sampleContent?.buttonVariables?.[placeholder] || ''}
+                                  value={template.sampleContent?.bodyVariables?.[placeholder] || ''}
                                   onChange={(e) => {
                                     const newSampleContent = {
                                       ...template.sampleContent,
                                       headerVariables: template.sampleContent?.headerVariables || {},
-                                      bodyVariables: template.sampleContent?.bodyVariables || {},
-                                      buttonVariables: {
-                                        ...template.sampleContent?.buttonVariables,
+                                      bodyVariables: {
+                                        ...template.sampleContent?.bodyVariables,
                                         [placeholder]: e.target.value
-                                      }
+                                      },
+                                      buttonVariables: template.sampleContent?.buttonVariables || {},
                                     };
                                     setTemplate({
                                       ...template,
@@ -335,7 +356,7 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
                                     });
                                   }}
                                   className="rsp-w-full rsp-px-3 rsp-py-2 rsp-border rsp-border-gray-300 rsp-rounded-md rsp-text-sm focus:rsp-outline-none focus:rsp-ring-1 focus:rsp-ring-blue-500 focus:rsp-border-blue-500"
-                                  placeholder={`Sample value (e.g., ${placeholder === '1' ? 'order123' : placeholder === '2' ? 'user456' : 'value' + placeholder})`}
+                                  placeholder={`Sample value (e.g., ${placeholder === '1' ? 'order123' : 'user456'})`}
                                 />
                               </div>
                             ));
@@ -347,7 +368,7 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
                           <p className="rsp-text-xs rsp-font-medium rsp-text-gray-700 rsp-mb-1">Preview URL:</p>
                           <p className="rsp-text-xs rsp-text-gray-600 rsp-font-mono rsp-break-all">
                             {formData.value.replace(/\{\{(\d+)\}\}/g, (match, number) => 
-                              template.sampleContent?.buttonVariables?.[number] || `[${match}]`
+                              template.sampleContent?.bodyVariables?.[number] || `[${match}]`
                             )}
                           </p>
                         </div>
@@ -486,4 +507,3 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
     </div>
   );
 }
-

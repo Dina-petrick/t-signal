@@ -11,16 +11,17 @@ export const createTrustSignalTemplate = async (
     // Use full language code as provided
     const langCode = template.language; // Keep "en_US" format
 
-    // Check if this is a document template (different structure)
-    const isDocumentTemplate = template.headerType === 'MEDIA' && template.mediaType === 'DOCUMENT';
-    
-    let raw = "";
-    
+    // Check if this is a document template (which has a different structure)
+    const isDocumentTemplate =
+      template.headerType === 'MEDIA' && template.mediaType === 'DOCUMENT';
+
+    let raw = '';
+
     if (isDocumentTemplate) {
-      // Document template uses different structure
+      // Document template uses a different structure
       raw = buildDocumentTemplateRaw(template, langCode);
     } else {
-      // Regular template uses components array
+      // Regular template uses a standard components array
       raw = buildRegularTemplateRaw(template, langCode);
     }
 
@@ -91,46 +92,54 @@ export const createTrustSignalTemplate = async (
   }
 };
 
-// Build document template (different structure)
+// CORRECTED: Build document template payload to match the required API structure.
 const buildDocumentTemplateRaw = (template: Template, langCode: string): string => {
   const payload: any = {
     name: template.name,
     lang: langCode,
     category: template.category,
-    type: "single",
-    components: {}
+    components: [], // Components should be an array
   };
 
-  // Header - DOCUMENT
+  // Add top-level media object and the HEADER component
   if (template.headerType === 'MEDIA' && template.mediaUrl) {
-    payload.components.header = {
-      format: "DOCUMENT",
-      url: template.mediaUrl
+    payload.media = {
+      header: template.mediaUrl,
     };
+    payload.components.push({
+      type: 'HEADER',
+      format: 'DOCUMENT',
+    });
   }
 
-  // Body
+  // Build and push the BODY component
   const bodyVariables = extractVariables(template.body);
-  payload.components.body = { text: template.body };
-
+  const bodyComponent: any = {
+    type: 'BODY',
+    text: template.body,
+  };
   if (bodyVariables.length > 0 && template.sampleContent?.bodyVariables) {
     const bodySampleValues = getBodySampleValues(template, bodyVariables);
-    payload.components.body.example = {
-      body_text: [bodySampleValues]  // <-- important, wrap in array
+    bodyComponent.example = {
+      body_text: [bodySampleValues], // This creates the required nested array
     };
   }
+  payload.components.push(bodyComponent);
 
-  // Footer (only if non-empty)
+  // Build and push the FOOTER component if it exists
   if (template.footer?.trim()) {
-    payload.components.footer = { text: template.footer };
+    payload.components.push({
+      type: 'FOOTER',
+      text: template.footer,
+    });
   }
 
-  // Buttons (only if non-empty)
+  // Build and push the BUTTONS component if buttons exist
   if (template.buttons && template.buttons.length > 0) {
-    payload.components.buttons = template.buttons.map((button) => {
+    const buttons = template.buttons.map(button => {
       const buttonData: any = {
         type: button.type === 'CALL' ? 'PHONE_NUMBER' : button.type,
-        text: button.text
+        text: button.text,
       };
 
       if (button.type === 'URL' && button.value) {
@@ -140,8 +149,10 @@ const buildDocumentTemplateRaw = (template: Template, langCode: string): string 
         if (button.urlType === 'dynamic' && button.value.includes('{{')) {
           const urlVariables = extractVariables(button.value);
           if (urlVariables.length > 0 && template.sampleContent?.buttonVariables) {
-            const urlSampleValues = urlVariables.map(({ number }) =>
-              template.sampleContent?.buttonVariables?.[number] || `sample${number}`
+            const urlSampleValues = urlVariables.map(
+              ({ number }) =>
+                template.sampleContent?.buttonVariables?.[number] ||
+                `sample${number}`
             );
             buttonData.example = urlSampleValues;
           }
@@ -156,50 +167,59 @@ const buildDocumentTemplateRaw = (template: Template, langCode: string): string 
 
       return buttonData;
     });
+
+    payload.components.push({
+      type: 'BUTTONS',
+      buttons: buttons,
+    });
   }
 
   return JSON.stringify(payload);
 };
 
-
-// Build regular template (components array)
+// Build regular template (components array) - No changes needed here.
 const buildRegularTemplateRaw = (template: Template, langCode: string): string => {
   const payload: any = {
     name: template.name,
     lang: langCode,
     category: template.category,
-    shortlink: template.enableClickTracking ? "1" : "0",
-    components: []
+    shortlink: template.enableClickTracking ? '1' : '0',
+    components: [],
   };
 
   // Add media section if header has media (but not for document)
-  if (template.headerType === 'MEDIA' && template.mediaUrl && template.mediaType !== 'DOCUMENT') {
+  if (
+    template.headerType === 'MEDIA' &&
+    template.mediaUrl &&
+    template.mediaType !== 'DOCUMENT'
+  ) {
     payload.media = {
-      header: template.mediaUrl
+      header: template.mediaUrl,
     };
   }
 
   // Build components array
   const components: any[] = [];
-  
-  // Add header component  
+
+  // Add header component
   if (template.headerType === 'TEXT' && template.headerText) {
     const headerVariables = extractVariables(template.headerText);
     const headerComponent = {
-      type: "HEADER",
-      format: "TEXT",
+      type: 'HEADER',
+      format: 'TEXT',
       text: template.headerText,
-      ...(headerVariables.length > 0 && template.sampleContent?.headerVariables && {
-        example: {
-          header_text: getHeaderSampleValues(template, headerVariables)
-        }
-      })
+      ...(headerVariables.length > 0 &&
+        template.sampleContent?.headerVariables && {
+          example: {
+            header_text: getHeaderSampleValues(template, headerVariables),
+          },
+        }),
     };
     components.push(headerComponent);
   } else if (template.headerType === 'MEDIA') {
     const headerComponent = {
-      type: "HEADER",
-      format: template.mediaType || "IMAGE"
+      type: 'HEADER',
+      format: template.mediaType || 'IMAGE',
     };
     components.push(headerComponent);
   }
@@ -207,27 +227,28 @@ const buildRegularTemplateRaw = (template: Template, langCode: string): string =
   // Add body component
   const bodyVariables = extractVariables(template.body);
   const bodyComponent = {
-    type: "BODY",
+    type: 'BODY',
     text: template.body,
-    ...(bodyVariables.length > 0 && template.sampleContent?.bodyVariables && {
-      example: {
-        body_text: [getBodySampleValues(template, bodyVariables)]
-      }
-    })
+    ...(bodyVariables.length > 0 &&
+      template.sampleContent?.bodyVariables && {
+        example: {
+          body_text: [getBodySampleValues(template, bodyVariables)],
+        },
+      }),
   };
   components.push(bodyComponent);
 
   // Add footer component
   if (template.footer) {
     components.push({
-      type: "FOOTER",
-      text: template.footer
+      type: 'FOOTER',
+      text: template.footer,
     });
   }
 
   // Add buttons component
   if (template.buttons.length > 0) {
-    const buttons = template.buttons.map((button) => {
+    const buttons = template.buttons.map(button => {
       const buttonData: any = {
         type: button.type === 'CALL' ? 'PHONE_NUMBER' : button.type,
         text: button.text,
@@ -235,19 +256,24 @@ const buildRegularTemplateRaw = (template: Template, langCode: string): string =
 
       if (button.type === 'URL' && button.value) {
         buttonData.url = button.value;
-        
+
         // Add URL example if it's a dynamic URL with variables
         if (button.urlType === 'dynamic' && button.value.includes('{{')) {
           const urlVariables = extractVariables(button.value);
-          if (urlVariables.length > 0 && template.sampleContent?.buttonVariables) {
-            const urlSampleValues = urlVariables.map(({ number }) => 
-              template.sampleContent?.buttonVariables?.[number] || `sample${number}`
+          if (
+            urlVariables.length > 0 &&
+            template.sampleContent?.buttonVariables
+          ) {
+            const urlSampleValues = urlVariables.map(
+              ({ number }) =>
+                template.sampleContent?.buttonVariables?.[number] ||
+                `sample${number}`
             );
             buttonData.example = urlSampleValues;
           }
         }
       }
-      
+
       if (button.type === 'CALL' && button.value) {
         buttonData.phone_number = button.value;
       }
@@ -256,8 +282,8 @@ const buildRegularTemplateRaw = (template: Template, langCode: string): string =
     });
 
     components.push({
-      type: "BUTTONS",
-      buttons: buttons
+      type: 'BUTTONS',
+      buttons: buttons,
     });
   }
 
@@ -270,7 +296,7 @@ const extractVariables = (
   text: string
 ): { variable: string; number: string }[] => {
   const matches = text.match(/\{\{(\d+)\}\}/g) || [];
-  return matches.map((match, index) => ({
+  return matches.map(match => ({
     variable: match.replace(/[{}]/g, ''),
     number: match.replace(/[{}]/g, ''),
   }));

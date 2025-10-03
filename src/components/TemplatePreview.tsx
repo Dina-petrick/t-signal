@@ -12,22 +12,23 @@ export default function TemplatePreview({ template }: Props) {
   const renderText = (text: string) => {
     if (!text) return '';
     
-    // For header text, use headerVariables
-    if (text === template.headerText) {
-      return text.replace(/\{\{(\d+)\}\}/g, (match, variable) => {
-        const sampleValue = template.sampleContent?.headerVariables?.[variable];
-        return sampleValue || `[Variable ${variable}]`;
-      });
-    }
-    
-    // For body text, use bodyVariables
+    // Create a combined map of variables for easier lookup
+    const allVariables = {
+      ...(template.sampleContent?.headerVariables || {}),
+      ...(template.sampleContent?.bodyVariables || {})
+    };
+
+    // Replace variables using the combined map
     return text.replace(/\{\{(\d+)\}\}/g, (match, variable) => {
-      const sampleValue = template.sampleContent?.bodyVariables?.[variable];
-      return sampleValue || `[Variable ${variable}]`;
+      return allVariables[variable] || `[Variable ${variable}]`;
     });
   };
 
-  const hasContent = template.headerText || template.body || template.footer || template.buttons.length > 0;
+  // Condition to show the "Start building" placeholder
+  const hasAnyContent = template.headerType !== 'NONE' || template.body || template.footer || template.buttons.length > 0;
+  
+  // Condition to show the main white message bubble (for text, body, footer)
+  const hasTextBubbleContent = template.headerText || template.body || template.footer;
 
   return (
     <div className="rsp-bg-white rsp-rounded-lg rsp-shadow-sm rsp-border rsp-border-gray-200">
@@ -103,7 +104,7 @@ export default function TemplatePreview({ template }: Props) {
                   <div className="rsp-absolute rsp-inset-0 rsp-opacity-[0.03]" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.08'%3E%3Cpath d='M40 40c0-4.4-3.6-8-8-8s-8 3.6-8 8 3.6 8 8 8 8-3.6 8-8zm0-32c0-4.4-3.6-8-8-8s-8 3.6-8 8 3.6 8 8 8 8-3.6 8-8zm32 32c0-4.4-3.6-8-8-8s-8 3.6-8 8 3.6 8 8 8 8-3.6 8-8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`}}></div>
                   
                   <div className="rsp-relative rsp-px-4 rsp-py-4">
-                    {!hasContent ? (
+                    {!hasAnyContent ? (
                       <div className="rsp-flex rsp-items-center rsp-justify-center rsp-h-[300px]">
                         <div className="rsp-text-center rsp-text-gray-500 rsp-animate-fade-in">
                           <div className="rsp-w-12 rsp-h-12 rsp-bg-gradient-to-br rsp-from-gray-50 rsp-to-gray-100 rsp-rounded-full rsp-flex rsp-items-center rsp-justify-center rsp-mx-auto rsp-mb-2 rsp-shadow-md rsp-border rsp-border-gray-200">
@@ -114,43 +115,31 @@ export default function TemplatePreview({ template }: Props) {
                         </div>
                       </div>
                     ) : (
-                      <>
-                        {/* Message Bubble */}
-                        <div className="rsp-flex rsp-justify-start rsp-mb-4">
-                          <div className="rsp-bg-gradient-to-b rsp-from-white rsp-to-[#fafafa] rsp-rounded-[12px] rsp-max-w-[220px] rsp-shadow-[0_2px_8px_rgba(0,0,0,0.08)] rsp-relative rsp-border rsp-border-gray-100 rsp-animate-slide-up">
-                            <div className="rsp-absolute rsp-left-[-6px] rsp-top-[12px] rsp-w-0 rsp-h-0 rsp-border-t-[6px] rsp-border-t-transparent rsp-border-r-[6px] rsp-border-r-white rsp-border-b-[6px] rsp-border-b-transparent rsp-drop-shadow-sm"></div>
-                            
-                            {/* Header Content */}
-                            {template.headerType === 'TEXT' && template.headerText && (
-                              <div className="rsp-px-4 rsp-pt-3 rsp-pb-2">
-                                <div className="rsp-text-[14px] rsp-font-bold rsp-text-[#1f2937] rsp-leading-tight rsp-tracking-tight rsp-break-all">
-                                  {renderText(template.headerText)}
-                                </div>
-                              </div>
-                            )}
-                            
-                            {template.headerType === 'MEDIA' && template.mediaUrl && (
-                              <div className="rsp-mb-0">
-                                {template.mediaType === 'IMAGE' && (
-                                  <img 
-                                    src={template.mediaUrl} 
-                                    alt="Header media" 
-                                    className="rsp-w-full rsp-max-h-[120px] rsp-object-cover rsp-rounded-t-[12px] rsp-shadow-sm"
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                  />
-                                )}
-                                {template.mediaType === 'VIDEO' && (
-                                  <div className="rsp-relative rsp-w-full rsp-h-[120px] rsp-bg-gradient-to-br rsp-from-gray-800 rsp-to-gray-900 rsp-rounded-t-[12px] rsp-flex rsp-items-center rsp-justify-center">
-                                    <div className="rsp-w-12 rsp-h-12 rsp-bg-black rsp-bg-opacity-70 rsp-rounded-full rsp-flex rsp-items-center rsp-justify-center rsp-shadow-lg rsp-border rsp-border-white rsp-border-opacity-20">
-                                      <div className="rsp-w-0 rsp-h-0 rsp-border-l-[8px] rsp-border-l-white rsp-border-t-[6px] rsp-border-t-transparent rsp-border-b-[6px] rsp-border-b-transparent rsp-ml-1"></div>
-                                    </div>
-                                    <div className="rsp-absolute rsp-bottom-2 rsp-right-2 rsp-bg-black rsp-bg-opacity-75 rsp-text-white rsp-text-[10px] rsp-px-2 rsp-py-1 rsp-rounded-full rsp-shadow-md rsp-backdrop-blur-sm">
-                                      📹 Video
-                                    </div>
+                      <div className="rsp-flex rsp-flex-col rsp-items-start">
+                        {/* Media Header (as a separate bubble) */}
+                        {template.headerType === 'MEDIA' && template.mediaUrl && (
+                           <div className="rsp-max-w-[220px] rsp-w-auto rsp-rounded-xl rsp-overflow-hidden rsp-shadow-md rsp-mb-1.5 rsp-animate-slide-up rsp-border rsp-border-gray-200">
+                              {template.mediaType === 'IMAGE' && (
+                                <img 
+                                  src={template.mediaUrl} 
+                                  alt="Header media" 
+                                  className="rsp-w-full rsp-max-h-[150px] rsp-object-cover rsp-block"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              )}
+                              {template.mediaType === 'VIDEO' && (
+                                <div className="rsp-relative rsp-min-w-[150px] rsp-w-full rsp-h-[150px] rsp-bg-gradient-to-br rsp-from-gray-800 rsp-to-gray-900 rsp-flex rsp-items-center rsp-justify-center">
+                                  <div className="rsp-w-12 rsp-h-12 rsp-bg-black rsp-bg-opacity-70 rsp-rounded-full rsp-flex rsp-items-center rsp-justify-center rsp-shadow-lg rsp-border rsp-border-white rsp-border-opacity-20">
+                                    <div className="rsp-w-0 rsp-h-0 rsp-border-l-[8px] rsp-border-l-white rsp-border-t-[6px] rsp-border-t-transparent rsp-border-b-[6px] rsp-border-b-transparent rsp-ml-1"></div>
                                   </div>
-                                )}
-                                {template.mediaType === 'DOCUMENT' && (
-                                  <div className="rsp-p-3 rsp-bg-gradient-to-r rsp-from-gray-50 rsp-to-gray-100 rsp-rounded-t-[12px] rsp-flex rsp-items-center rsp-gap-2">
+                                  <div className="rsp-absolute rsp-bottom-2 rsp-right-2 rsp-bg-black rsp-bg-opacity-75 rsp-text-white rsp-text-[10px] rsp-px-2 rsp-py-1 rsp-rounded-full rsp-shadow-md rsp-backdrop-blur-sm">
+                                    📹 Video
+                                  </div>
+                                </div>
+                              )}
+                              {template.mediaType === 'DOCUMENT' && (
+                                <div className="rsp-p-3 rsp-bg-gradient-to-r rsp-from-gray-50 rsp-to-gray-100">
+                                  <div className="rsp-flex rsp-items-center rsp-gap-2">
                                     <div className="rsp-w-10 rsp-h-10 rsp-bg-gradient-to-br rsp-from-red-500 rsp-to-red-600 rsp-rounded-lg rsp-flex rsp-items-center rsp-justify-center rsp-shadow-md">
                                       <span className="rsp-text-white rsp-text-[9px] rsp-font-bold">PDF</span>
                                     </div>
@@ -159,37 +148,54 @@ export default function TemplatePreview({ template }: Props) {
                                       <div className="rsp-text-[10px] rsp-text-gray-600">PDF • 1.2 MB</div>
                                     </div>
                                   </div>
-                                )}
-                              </div>
-                            )}
-                            
-                            {/* Body Text */}
-                            {template.body && (
-                              <div className="rsp-px-4 rsp-py-2">
-                                <div className="rsp-text-[12px] rsp-text-[#1f2937] rsp-leading-relaxed rsp-whitespace-pre-wrap rsp-tracking-tight rsp-break-all">
-                                  {renderText(template.body)}
                                 </div>
-                              </div>
-                            )}
-                            
-                            {/* Footer */}
-                            {template.footer && (
-                              <div className="rsp-px-4 rsp-pb-2">
-                                <div className="rsp-text-[10px] rsp-text-[#6b7280] rsp-pt-2 rsp-border-t rsp-border-gray-100">
-                                  {template.footer}
+                              )}
+                           </div>
+                        )}
+                        
+                        {/* Message Bubble */}
+                        {hasTextBubbleContent && (
+                          <div className="rsp-flex rsp-justify-start rsp-mb-1.5">
+                            <div className="rsp-bg-gradient-to-b rsp-from-white rsp-to-[#fafafa] rsp-rounded-[12px] rsp-max-w-[220px] rsp-shadow-[0_2px_8px_rgba(0,0,0,0.08)] rsp-relative rsp-border rsp-border-gray-100 rsp-animate-slide-up">
+                              {/* <div className="rsp-absolute rsp-left-[-6px] rsp-top-[12px] rsp-w-0 rsp-h-0 rsp-border-t-[6px] rsp-border-t-transparent rsp-border-r-[6px] rsp-border-r-white rsp-border-b-[6px] rsp-border-b-transparent rsp-drop-shadow-sm"></div> */}
+                              
+                              {/* Text Header */}
+                              {template.headerType === 'TEXT' && template.headerText && (
+                                <div className="rsp-px-4 rsp-pt-3 rsp-pb-2">
+                                  <div className="rsp-text-[14px] rsp-font-bold rsp-text-[#1f2937] rsp-leading-tight rsp-tracking-tight rsp-break-all">
+                                    {renderText(template.headerText)}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                            
-                            {/* Timestamp */}
-                            <div className="rsp-px-4 rsp-pb-2 rsp-text-right">
-                              <div className="rsp-text-[9px] rsp-text-[#667781] rsp-flex rsp-items-center rsp-justify-end rsp-gap-1 rsp-opacity-80">
-                                9:41 AM
-                                <svg className="rsp-w-2 rsp-h-2 rsp-text-blue-500" viewBox="0 0 16 15" fill="currentColor"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l3.61 3.463c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.064-.512z"/></svg>
+                              )}
+                              
+                              {/* Body Text */}
+                              {template.body && (
+                                <div className="rsp-px-4 rsp-py-2">
+                                  <div className="rsp-text-[12px] rsp-text-[#1f2937] rsp-leading-relaxed rsp-whitespace-pre-wrap rsp-tracking-tight rsp-break-all">
+                                    {renderText(template.body)}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Footer */}
+                              {template.footer && (
+                                <div className="rsp-px-4 rsp-pb-2">
+                                  <div className="rsp-text-[10px] rsp-text-[#6b7280] rsp-pt-2 rsp-border-t rsp-border-gray-100">
+                                    {template.footer}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Timestamp */}
+                              <div className="rsp-px-4 rsp-pb-2 rsp-text-right">
+                                <div className="rsp-text-[9px] rsp-text-[#667781] rsp-flex rsp-items-center rsp-justify-end rsp-gap-1 rsp-opacity-80">
+                                  9:41 AM
+                                  <svg className="rsp-w-2 rsp-h-2 rsp-text-blue-500" viewBox="0 0 16 15" fill="currentColor"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l3.61 3.463c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.064-.512z"/></svg>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                         
                         {/* Buttons */}
                         {template.buttons.length > 0 && (
@@ -202,7 +208,7 @@ export default function TemplatePreview({ template }: Props) {
                             </div>
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>

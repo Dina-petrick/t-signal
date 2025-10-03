@@ -143,6 +143,11 @@ export function TemplateBuilder() {
     }));
   };
 
+  const handleSuccessModalClose = () => {
+    setSuccessModal({ isOpen: false });
+    navigate('/');
+  };
+
   return (
     <div className="rsp-min-h-screen rsp-bg-white">
       <div className="rsp-max-w-[1200px] rsp-mx-auto rsp-px-6 rsp-h-full">
@@ -192,7 +197,7 @@ export function TemplateBuilder() {
                     className="rsp-w-full rsp-px-0 rsp-py-2 rsp-border-0 rsp-border-b rsp-border-gray-300 rsp-text-sm focus:rsp-outline-none focus:rsp-border-blue-500 rsp-bg-transparent"
                     placeholder="Template name cannot Have capital letters and space"
                   />
-                  <div className="rsp-absolute rsp-bottom-0 rsp-left-0 rsp-w-4 rsp-h-0.5 rsp-bg-red-500"></div>
+                  <div className="rsp-absolute rsp-bottom-0 rsp-left-0 rsp-w-4 rsp-h-0-5 rsp-bg-red-500"></div>
                 </div>
                 <p className="rsp-text-xs rsp-text-gray-500 rsp-mt-1">Template name cannot Have capital letters and space</p>
               </div>
@@ -349,7 +354,7 @@ export function TemplateBuilder() {
       {/* Success Modal */}
       <Modal
         isOpen={successModal.isOpen}
-        onClose={() => setSuccessModal({ isOpen: false })}
+        onClose={handleSuccessModalClose}
         title="Success"
       >
         <div className="rsp-space-y-4">
