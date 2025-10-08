@@ -27,6 +27,7 @@ export default function ButtonList({ buttons, flowButtonText, onShowAllOptions }
         <button
           key={button.id}
           className="rsp-w-full rsp-py-4 rsp-text-[#128C7E] rsp-text-[15px] rsp-font-medium rsp-bg-white hover:rsp-bg-gray-50 rsp-flex rsp-items-center rsp-gap-3 rsp-px-4 rsp-transition-colors"
+          style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
         >
           <div className="rsp-text-[#128C7E]">
             <ButtonIcon type={button.type} />
@@ -41,6 +42,7 @@ export default function ButtonList({ buttons, flowButtonText, onShowAllOptions }
         <button
           onClick={onShowAllOptions}
           className="rsp-w-full rsp-py-4 rsp-text-[#128C7E] rsp-text-[15px] rsp-font-medium rsp-bg-white hover:rsp-bg-gray-50 rsp-flex rsp-items-center rsp-justify-center rsp-transition-colors"
+          style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
         >
           <span className="rsp-text-lg rsp-mr-2">⋯</span>
           See all options

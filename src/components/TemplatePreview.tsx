@@ -162,7 +162,7 @@ export default function TemplatePreview({ template }: Props) {
                               {/* Text Header */}
                               {template.headerType === 'TEXT' && template.headerText && (
                                 <div className="rsp-px-4 rsp-pt-3 rsp-pb-2">
-                                  <div className="rsp-text-[14px] rsp-font-bold rsp-text-[#1f2937] rsp-leading-tight rsp-tracking-tight rsp-break-all">
+                                  <div className="rsp-text-[15px] rsp-font-semibold rsp-text-[#111b21] rsp-leading-[1.3] rsp-tracking-normal rsp-break-words" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
                                     {renderText(template.headerText)}
                                   </div>
                                 </div>
@@ -171,7 +171,7 @@ export default function TemplatePreview({ template }: Props) {
                               {/* Body Text */}
                               {template.body && (
                                 <div className="rsp-px-4 rsp-py-2">
-                                  <div className="rsp-text-[12px] rsp-text-[#1f2937] rsp-leading-relaxed rsp-whitespace-pre-wrap rsp-tracking-tight rsp-break-all">
+                                  <div className="rsp-text-[14px] rsp-text-[#111b21] rsp-leading-[1.4] rsp-whitespace-pre-wrap rsp-tracking-normal rsp-break-words" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
                                     {renderText(template.body)}
                                   </div>
                                 </div>
@@ -180,7 +180,7 @@ export default function TemplatePreview({ template }: Props) {
                               {/* Footer */}
                               {template.footer && (
                                 <div className="rsp-px-4 rsp-pb-2">
-                                  <div className="rsp-text-[10px] rsp-text-[#6b7280] rsp-pt-2 rsp-border-t rsp-border-gray-100">
+                                  <div className="rsp-text-[12px] rsp-text-[#667781] rsp-pt-2 rsp-border-t rsp-border-gray-100" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
                                     {template.footer}
                                   </div>
                                 </div>
@@ -188,9 +188,9 @@ export default function TemplatePreview({ template }: Props) {
 
                               {/* Timestamp */}
                               <div className="rsp-px-4 rsp-pb-2 rsp-text-right">
-                                <div className="rsp-text-[9px] rsp-text-[#667781] rsp-flex rsp-items-center rsp-justify-end rsp-gap-1 rsp-opacity-80">
+                                <div className="rsp-text-[11px] rsp-text-[#667781] rsp-flex rsp-items-center rsp-justify-end rsp-gap-1 rsp-opacity-80" style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
                                   9:41 AM
-                                  <svg className="rsp-w-2 rsp-h-2 rsp-text-blue-500" viewBox="0 0 16 15" fill="currentColor"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l3.61 3.463c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.064-.512z"/></svg>
+                                  <svg className="rsp-w-3 rsp-h-3 rsp-text-[#53bdeb]" viewBox="0 0 16 15" fill="currentColor"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.879a.32.32 0 0 1-.484.033l-.358-.325a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l1.32 1.266c.143.14.361.125.484-.033l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.879a.32.32 0 0 1-.484.033L1.891 7.769a.319.319 0 0 0-.484.032l-.378.483a.418.418 0 0 0 .036.541l3.61 3.463c.143.14.361.125.484-.033l6.272-8.048a.365.365 0 0 0-.064-.512z"/></svg>
                                 </div>
                               </div>
                             </div>
@@ -242,7 +242,8 @@ export default function TemplatePreview({ template }: Props) {
                         {template.buttons.map((button, index) => (
                           <div 
                             key={button.id}
-                            className={`rsp-p-4 rsp-text-center rsp-text-md rsp-text-blue-600 ${index < template.buttons.length - 1 ? 'rsp-border-b rsp-border-gray-300' : ''}`}
+                            className={`rsp-p-4 rsp-text-center rsp-text-[15px] rsp-text-[#128C7E] rsp-font-medium ${index < template.buttons.length - 1 ? 'rsp-border-b rsp-border-gray-300' : ''}`}
+                            style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
                           >
                             {button.text}
                           </div>
@@ -252,7 +253,8 @@ export default function TemplatePreview({ template }: Props) {
                       {/* Close Button */}
                       <div
                         onClick={() => setShowButtonList(false)}
-                        className="rsp-mt-2 rsp-p-4 rsp-text-center rsp-font-bold rsp-text-blue-600 rsp-bg-white rsp-cursor-pointer rsp-shadow-inner"
+                        className="rsp-mt-2 rsp-p-4 rsp-text-center rsp-font-bold rsp-text-[#128C7E] rsp-bg-white rsp-cursor-pointer rsp-shadow-inner"
+                        style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
                       >
                         Close
                       </div>

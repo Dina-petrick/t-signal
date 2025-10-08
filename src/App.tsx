@@ -5,12 +5,14 @@ import { TemplateBuilder } from './components/TemplateBuilder';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<MessageTemplatesDashboard />} />
-        <Route path="/create" element={<TemplateBuilder />} />
-      </Routes>
-    </Router>
+    <div className="rsp-min-h-screen rsp-p-4">
+      <Router>
+        <Routes>
+          <Route path="/" element={<MessageTemplatesDashboard />} />
+          <Route path="/create" element={<TemplateBuilder />} />
+        </Routes>
+      </Router>
+    </div>
   );
 }
 

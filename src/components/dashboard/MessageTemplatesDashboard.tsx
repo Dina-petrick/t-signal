@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTemplateList } from '../../api/templates/list';
 import { ApiCredentials, TemplateListResponse } from '../../api/types';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, Plus } from 'lucide-react';
 import Modal from '../Modal';
 
 export default function MessageTemplatesDashboard() {
@@ -129,19 +129,19 @@ export default function MessageTemplatesDashboard() {
   }
 
   return (
-    <div className="rsp-container rsp-mx-auto rsp-px-4 rsp-py-8">
+    <div className="rsp-container rsp-mx-auto rsp-px-4 rsp-py-8 rsp-bg-[#f5f7fc] rsp-rounded-lg rsp-shadow-sm">
       <div className="rsp-flex rsp-justify-between rsp-items-center rsp-mb-6">
         <h1 className="rsp-text-2xl rsp-font-bold">Whatsapp HSM Templates</h1>
         <button
           onClick={() => navigate('/create')}
-          className="rsp-bg-blue-600 rsp-text-white rsp-px-4 rsp-py-2 rsp-rounded-md hover:rsp-bg-blue-700"
+          className="rsp-bg-blue-600 rsp-text-white rsp-p-1 rsp-rounded-full hover:rsp-bg-blue-700 rsp-flex rsp-items-center rsp-gap-2"
         >
-          Create Template
+          <Plus className="rsp-w-6 rsp-h-6" />
         </button>
       </div>
 
       {/* Account Credentials */}
-      <div className="rsp-bg-white rsp-p-4 rsp-pl-0 rsp-rounded-lg rsp-shadow-sm rsp-mb-6">
+      {/* <div className="rsp-bg-white rsp-p-4 rsp-pl-0 rsp-rounded-lg rsp-shadow-sm rsp-mb-6">
         <div>
           <label className="rsp-block rsp-text-sm rsp-font-medium rsp-text-gray-700 rsp-mb-1">
             TrustSignal API Key
@@ -158,7 +158,7 @@ export default function MessageTemplatesDashboard() {
             <div className="rsp-absolute rsp-bottom-0 rsp-left-0 rsp-w-4 rsp-h-0.5 rsp-bg-red-500"></div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {error && (
         <div className="rsp-bg-red-50 rsp-border-l-4 rsp-border-red-500 rsp-p-4 rsp-mb-6">

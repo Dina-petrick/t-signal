@@ -149,7 +149,7 @@ export function TemplateBuilder() {
   };
 
   return (
-    <div className="rsp-min-h-screen rsp-bg-white">
+    <div className="rsp-min-h-screen rsp-bg-[#f5f7fc] rsp-rounded-lg rsp-shadow-sm">
       <div className="rsp-max-w-[1200px] rsp-mx-auto rsp-px-6 rsp-h-full">
         {/* Header */}
         <div className="rsp-py-6 rsp-border-b rsp-border-gray-200">
@@ -184,7 +184,7 @@ export function TemplateBuilder() {
           {/* Left Column - Form */}
           <div className={`rsp-space-y-8 ${showPreview ? '' : 'rsp-max-w-4xl rsp-mx-auto'}`}>
             {/* Basic Template Info */}
-            <div className="rsp-space-y-6">
+            <div className="rsp-bg-white rsp-p-6 rsp-rounded-lg rsp-shadow-sm rsp-space-y-6">
               {/* Template Name */}
               <div>
                 <label className="rsp-block rsp-text-sm rsp-font-medium rsp-text-gray-700 rsp-mb-2">
@@ -306,10 +306,12 @@ export function TemplateBuilder() {
             </div>
 
             {/* Rest of the form */}
-            <TrustSignalTemplateBuilder template={template} setTemplate={setTemplate} />
+            <div className="rsp-bg-white rsp-p-6 rsp-rounded-lg rsp-shadow-sm">
+              <TrustSignalTemplateBuilder template={template} setTemplate={setTemplate} />
+            </div>
 
             {/* Submit Section */}
-            <div className="rsp-pt-6 rsp-border-t rsp-border-gray-200">
+            <div className="rsp-bg-white rsp-p-6 rsp-rounded-lg rsp-shadow-sm rsp-pt-6 rsp-border-t rsp-border-gray-200">
               {error && (
                 <div className="rsp-mb-4 rsp-flex rsp-items-start rsp-gap-3 rsp-p-4 rsp-rounded-lg rsp-bg-red-50 rsp-border-l-4 rsp-border-l-red-500 rsp-relative rsp-animate-fade-in">
                   <AlertCircle className="rsp-w-5 rsp-h-5 rsp-text-red-500 rsp-flex-shrink-0 rsp-mt-0.5" />

@@ -65,4 +65,10 @@
 
 body {
   font-family: 'Mukta', sans-serif;
+  background-color: #f5f7fc;
+}
+
+#root {
+  background-color: #f5f7fc;
+  min-height: 100vh;
 }
