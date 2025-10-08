@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Template } from '../types';
 import EmojiModal from './emoji/EmojiModal';
-import { Smile, Type, Image, Video, FileText, Paperclip, Eye } from 'lucide-react';
+import { Smile } from 'lucide-react';
 
 type Props = {
   template: Template;
@@ -150,6 +150,28 @@ export default function MessageStructure({ template, setTemplate }: Props) {
         {/* Toolbar */}
         <div className="rsp-flex rsp-items-center rsp-justify-between rsp-mt-2">
           <div className="rsp-flex rsp-items-center rsp-gap-2">
+            {/* Person Icon - Add Variable */}
+            <button
+              onClick={addVariable}
+              className="rsp-p-1 rsp-text-gray-500 hover:rsp-text-gray-700 hover:rsp-bg-gray-100 rsp-rounded"
+              title="Add Variable"
+            >
+              <svg className="rsp-w-4 rsp-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+            
+            {/* Text formatting/variable icon */}
+            <button
+              className="rsp-p-1 rsp-text-gray-500 hover:rsp-text-gray-700 hover:rsp-bg-gray-100 rsp-rounded"
+              title="Text formatting"
+            >
+              <svg className="rsp-w-4 rsp-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2M7 4h10M7 4l-2 16h14l-2-16M10 8v8M14 8v8" />
+              </svg>
+            </button>
+            
+            {/* Smiley face icon */}
             <button
               onClick={openEmojiModalForBody}
               className="rsp-p-1 rsp-text-gray-500 hover:rsp-text-gray-700 hover:rsp-bg-gray-100 rsp-rounded"
@@ -157,11 +179,26 @@ export default function MessageStructure({ template, setTemplate }: Props) {
             >
               <Smile className="rsp-w-4 rsp-h-4" />
             </button>
+            
+            {/* Bold text icon */}
             <button
-              onClick={addVariable}
-              className="rsp-px-2 rsp-py-1 rsp-text-xs rsp-bg-gray-100 hover:rsp-bg-gray-200 rsp-rounded rsp-text-gray-700"
+              className="rsp-p-1 rsp-text-gray-500 hover:rsp-text-gray-700 hover:rsp-bg-gray-100 rsp-rounded"
+              title="Bold text"
             >
-              Add Variable
+              <svg className="rsp-w-4 rsp-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
+              </svg>
+            </button>
+            
+            {/* Italic text icon */}
+            <button
+              className="rsp-p-1 rsp-text-gray-500 hover:rsp-text-gray-700 hover:rsp-bg-gray-100 rsp-rounded"
+              title="Italic text"
+            >
+              <svg className="rsp-w-4 rsp-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 4h4M8 20h4M12 4l-2 16" />
+              </svg>
             </button>
           </div>
           <div className="rsp-flex rsp-items-center rsp-gap-2">
@@ -197,7 +234,8 @@ export default function MessageStructure({ template, setTemplate }: Props) {
                             ...template.sampleContent?.bodyVariables,
                             [variable]: e.target.value
                           },
-                          headerVariables: template.sampleContent?.headerVariables || {}
+                          headerVariables: template.sampleContent?.headerVariables || {},
+                          buttonVariables: template.sampleContent?.buttonVariables || {}
                         };
                         setTemplate({
                           ...template,

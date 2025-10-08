@@ -33,7 +33,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     <div className="rsp-fixed rsp-inset-0 rsp-bg-black rsp-bg-opacity-50 rsp-flex rsp-items-center rsp-justify-center rsp-p-4 rsp-z-50">
       <div ref={modalRef} className="rsp-bg-white rsp-rounded-lg rsp-shadow-xl rsp-max-w-md rsp-w-full rsp-animate-modal-appear">
         <div className="rsp-flex rsp-items-center rsp-justify-between rsp-px-6 rsp-py-4 rsp-border-b">
-          <h2 className="rsp-text-lg rsp-font-semibold rsp-text-gray-900">{title}</h2>
+          <h2 className="rsp-text-lg rsp-font-semibold rsp-text-gray-900 rsp-text-center rsp-w-full">{title}</h2>
           <button
             onClick={onClose}
             className="rsp-p-1 hover:rsp-bg-gray-100 rsp-rounded-full"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Template } from '../../types';
-import { Plus, MessageCircle, ExternalLink, Phone, Workflow, X, Edit3 } from 'lucide-react';
+import { Plus, MessageCircle, ExternalLink, Phone, Workflow, X } from 'lucide-react';
 
 type Props = {
   template: Template;
@@ -121,15 +121,15 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
       current: counts.call,
       color: 'purple'
     },
-    {
-      type: 'FLOW' as const,
-      icon: Workflow,
-      label: 'Flow Button',
-      description: 'Connect to WhatsApp Flow',
-      limit: 1,
-      current: counts.flow,
-      color: 'orange'
-    }
+    // {
+    //   type: 'FLOW' as const,
+    //   icon: Workflow,
+    //   label: 'Flow Button',
+    //   description: 'Connect to WhatsApp Flow',
+    //   limit: 1,
+    //   current: counts.flow,
+    //   color: 'orange'
+    // }
   ];
 
   return (
@@ -141,7 +141,23 @@ export default function ButtonsSection({ template, setTemplate }: Props) {
           <p className="rsp-text-sm rsp-text-gray-500 rsp-mt-1">Add buttons to make your message interactive</p>
         </div>
         <div className="rsp-text-sm rsp-text-gray-500">
-          {template.buttons.length}/13 buttons
+          {/* {template.buttons.length}/13 buttons */}
+        </div>
+      </div>
+
+      {/* Marketing Opt-out Recommendation */}
+      <div className="rsp-bg-blue-50 rsp-border-l-4 rsp-border-blue-500 rsp-p-4 rsp-rounded-r-md">
+        <div className="rsp-flex">
+          <div className="rsp-flex-shrink-0">
+            <svg className="rsp-h-5 rsp-w-5 rsp-text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="rsp-ml-3">
+            <p className="rsp-text-sm rsp-text-blue-700">
+              We recommend adding the marketing opt-out button. This can help reduce blocks from customers and increase your quality rating.
+            </p>
+          </div>
         </div>
       </div>
 

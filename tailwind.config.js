@@ -4,6 +4,23 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Mukta', 'sans-serif'],
+      },
+      colors: {
+        blue: {
+          50: '#f0f4ff',
+          100: '#e0e9ff',
+          200: '#c7d7ff',
+          300: '#a5bbff',
+          400: '#8195ff',
+          500: '#0043ff',
+          600: '#0038e6',
+          700: '#002dcc',
+          800: '#0022b3',
+          900: '#001799',
+        },
+      },
       keyframes: {
         'modal-appear': {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
