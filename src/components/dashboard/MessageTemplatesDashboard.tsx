@@ -131,7 +131,7 @@ export default function MessageTemplatesDashboard() {
   return (
     <div className="rsp-container rsp-mx-auto rsp-px-4 rsp-py-8 rsp-bg-[#f5f7fc] rsp-rounded-lg rsp-shadow-sm">
       <div className="rsp-flex rsp-justify-between rsp-items-center rsp-mb-6">
-        <h1 className="rsp-text-2xl rsp-font-bold">Create Whatsapp Templates</h1>
+        <h1 className="rsp-text-2xl rsp-font-bold rsp-text-[#0043ff]">Create WhatsApp Templates</h1>
         <button
           onClick={() => navigate('/create')}
           className="rsp-bg-blue-600 rsp-text-white rsp-p-1 rsp-rounded-full hover:rsp-bg-blue-700 rsp-flex rsp-items-center rsp-gap-2"
